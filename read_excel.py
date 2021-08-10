@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from openpyxl import load_workbook
 
@@ -8,7 +8,7 @@ from openpyxl import load_workbook
 @dataclass
 class ApiRequest:
     country_iso: str
-    date: datetime
+    date: Optional[datetime]
 
 
 def read_config():
@@ -30,7 +30,7 @@ def read_excel() -> List[ApiRequest]:
     return result
 
 
-def call_api():
+def call_api(request: ApiRequest):
     pass
 
 
