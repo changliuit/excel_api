@@ -12,5 +12,6 @@ def test_read_excel():
 
 
 def test_api_call():
-    response = get_report([ApiRequest(iso='AUS', date='2021-08-11')])
+    response = get_report([ApiRequest(iso='USA', date='2020-04-16')])
     assert response.status_code == 200
+    assert response.json()
