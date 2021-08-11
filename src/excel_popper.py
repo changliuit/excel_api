@@ -5,6 +5,7 @@ from openpyxl import load_workbook
 from openpyxl import Workbook
 import requests
 
+from exceptions import InputError
 from src.data_classes import ApiRequest, Report
 
 
@@ -35,22 +36,25 @@ class ExcelPopper:
         response = requests.get(self.api_url, params=api_request.__dict__)
         return response
 
-    def get_report_to_write(self, api_requests: List[ApiRequest]):
+    def get_report_to_write(self, api_requests: List[ApiRequest]) -> List[Report]:
         """query api and return reports in needed format"""
         results = []
         for req in api_requests:
             response = self.query_api_for_report(req)
-            if response.status_code == 200 and response.json().get('data'):
-                reports = [
-                    Report(
-                        date=item['date'],
-                        iso=item['region']['iso'],
-                        num_confirmed=item['confirmed'],
-                        num_deaths=item['deaths'],
-                        num_recovered=item['recovered']
-                    ) for item in response.json()['data']
-                ]
-                results.extend(reports)
+            if response.status_code == 200:
+                if response.json().get('data'):
+                    reports = [
+                        Report(
+                            date=item['date'],
+                            iso=item['region']['iso'],
+                            num_confirmed=item['confirmed'],
+                            num_deaths=item['deaths'],
+                            num_recovered=item['recovered']
+                        ) for item in response.json()['data']
+                    ]
+                    results.extend(reports)
+            else:
+                raise InputError(f'Input data not valid. Error response: {response.json()}')
         return results
 
     def write_excel(self, reports: List[Report]):
