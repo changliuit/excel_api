@@ -10,7 +10,10 @@ Install packages:
 
 ```pip install -r requirements.txt```
 
+Running the script:
 
-Assumptions: (Can be enhancements)
+```python src/main.py```
 
-1. the Excel input only has 1 active sheet
+Potential Enhancements:
+1. validation on ISO and date format before sending to api (with pydantic)
+2. let user specify output path

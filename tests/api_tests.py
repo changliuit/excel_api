@@ -1,7 +1,7 @@
 import pytest as pytest
 
 from excel_popper import ApiRequest, ExcelPopper
-from exceptions import InputError
+from all_exceptions import InputError
 
 
 def test_api_call():

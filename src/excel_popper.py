@@ -5,8 +5,8 @@ from openpyxl import load_workbook
 from openpyxl import Workbook
 import requests
 
-from exceptions import InputError
-from src.data_classes import ApiRequest, Report
+from all_exceptions import InputError
+from data_classes import ApiRequest, Report
 
 
 class ExcelPopper:
@@ -20,6 +20,7 @@ class ExcelPopper:
         """return all the combinations of country and date from the excel file in config"""
         with open(pathlib.Path(__file__).parents[1] / self.config_file_name, 'r') as file:
             path = file.read()
+            print(f"Opening {path} from config file {self.config_file_name}")
             workbook = load_workbook(filename=path)
             result = []
             for row in workbook.active.rows:
@@ -29,7 +30,7 @@ class ExcelPopper:
                         date=row[1].value,
                     )
                     result.append(request)
-
+            print(f"{len(result)} lines loaded from file")
             return result
 
     def query_api_for_report(self, api_request: ApiRequest):
@@ -39,7 +40,8 @@ class ExcelPopper:
     def get_report_to_write(self, api_requests: List[ApiRequest]) -> List[Report]:
         """query api and return reports in needed format"""
         results = []
-        for req in api_requests:
+        for i, req in enumerate(api_requests):
+            print(f"Querying api for line {i + 1}...")
             response = self.query_api_for_report(req)
             if response.status_code == 200:
                 if response.json().get('data'):
@@ -59,9 +61,11 @@ class ExcelPopper:
 
     def write_excel(self, reports: List[Report]):
         """Write a list of reports to Excel"""
+        print(f"Saving reports to {self.output_filepath}...")
         wb = Workbook()
         ws1 = wb.active
         ws1.title = "Covid Numbers"
         for report in reports:
             ws1.append(list(report.__dict__.values()))
         wb.save(filename=self.output_filepath)
+        print(f"Saved to {self.output_filepath}")
