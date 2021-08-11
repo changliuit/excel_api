@@ -33,19 +33,21 @@ class ExcelPopper:
         response = requests.get(self.api_url, params=api_request.__dict__)
         return response
 
-    def get_data_to_write(self, api_requests: List[ApiRequest]):
+    def get_report_to_write(self, api_requests: List[ApiRequest]):
         results = []
         for req in api_requests:
             response = self.query_api_for_report(req)
             if response.status_code == 200 and response.json().get('data'):
-                report = Report(
-                    date=response.json()['data']['date'],
-                    iso=response.json()['data']['iso'],
-                    num_confirmed=response.json()['data']['num_confirmed'],
-                    num_deaths=response.json()['data']['num_deaths'],
-                    num_recovered=response.json()['data']['num_recovered']
-                )
-                results.append(report)
+                reports = [
+                    Report(
+                        date=item['date'],
+                        iso=item['region']['iso'],
+                        num_confirmed=item['confirmed'],
+                        num_deaths=item['deaths'],
+                        num_recovered=item['recovered']
+                    ) for item in response.json()['data']
+                ]
+                results.extend(reports)
         return results
 
     def write_excel(self):
