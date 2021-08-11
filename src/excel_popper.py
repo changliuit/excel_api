@@ -11,27 +11,25 @@ from data_classes import ApiRequest, Report
 
 class ExcelPopper:
     """Read an excel, query api, and write response to another excel"""
-    def __init__(self, output_filepath: Optional[str] = None):
+    def __init__(self, config_path: Optional[str] = None, output_filepath: Optional[str] = None):
         self.api_url: str = "https://covid-api.com/api/reports"
-        self.config_file_name: str = 'input.config'
+        self.config_path: str = config_path or 'input.config'
         self.output_filepath: str = output_filepath or 'output.xlsx'
 
     def read_excel(self) -> List[ApiRequest]:
         """return all the combinations of country and date from the excel file in config"""
-        with open(pathlib.Path(__file__).parents[1] / self.config_file_name, 'r') as file:
-            path = file.read()
-            print(f"Opening {path} from config file {self.config_file_name}")
-            workbook = load_workbook(filename=path)
-            result = []
-            for row in workbook.active.rows:
-                if row[0].value is not None:
-                    request = ApiRequest(
-                        iso=row[0].value,
-                        date=row[1].value,
-                    )
-                    result.append(request)
-            print(f"{len(result)} lines loaded from file")
-            return result
+        print(f"Opening {self.config_path}")
+        workbook = load_workbook(filename=self.config_path)
+        result = []
+        for row in workbook.active.rows:
+            if row[0].value is not None:
+                request = ApiRequest(
+                    iso=row[0].value,
+                    date=row[1].value,
+                )
+                result.append(request)
+        print(f"{len(result)} lines loaded from file")
+        return result
 
     def query_api_for_report(self, api_request: ApiRequest):
         response = requests.get(self.api_url, params=api_request.__dict__)
