@@ -12,6 +12,8 @@ def test_invalid_iso_api_call():
     assert response.status_code == 200
     assert not response.json()['data']
 
+
 def test_return_report():
-    result = ExcelPopper().get_report_to_write([ApiRequest(iso='USA', date='2020-04-16')])
+    ep = ExcelPopper()
+    result = ep.get_report_to_write([ApiRequest(iso='USA', date='2020-04-16')])
     assert result

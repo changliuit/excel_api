@@ -1,7 +1,8 @@
 import pathlib
-from typing import List
+from typing import List, Optional
 
 from openpyxl import load_workbook
+from openpyxl import Workbook
 import requests
 
 from src.data_classes import ApiRequest, Report
@@ -9,9 +10,10 @@ from src.data_classes import ApiRequest, Report
 
 class ExcelPopper:
     """Read an excel, query api, and write response to another excel"""
-    def __init__(self):
-        self.api_url = "https://covid-api.com/api/reports"
-        self.config_file_name = 'input.config'
+    def __init__(self, output_filepath: Optional[str] = None):
+        self.api_url: str = "https://covid-api.com/api/reports"
+        self.config_file_name: str = 'input.config'
+        self.output_filepath: str = output_filepath or 'output.xlsx'
 
     def read_excel(self) -> List[ApiRequest]:
         """return all the combinations of country and date from the excel file in config"""
@@ -34,6 +36,7 @@ class ExcelPopper:
         return response
 
     def get_report_to_write(self, api_requests: List[ApiRequest]):
+        """query api and return reports in needed format"""
         results = []
         for req in api_requests:
             response = self.query_api_for_report(req)
@@ -50,5 +53,11 @@ class ExcelPopper:
                 results.extend(reports)
         return results
 
-    def write_excel(self):
-        pass
+    def write_excel(self, reports: List[Report]):
+        """Write a list of reports to Excel"""
+        wb = Workbook()
+        ws1 = wb.active
+        ws1.title = "Covid Numbers"
+        for report in reports:
+            ws1.append(list(report.__dict__.values()))
+        wb.save(filename=self.output_filepath)
